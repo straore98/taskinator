@@ -1,5 +1,7 @@
 var taskIdCounter = 0;
 
+var tasks = [];
+
 var formE1 = document.querySelector("#task-form");
 var tasksToDoE1 = document.querySelector("#tasks-to-do");
 var pageContentE1 = document.querySelector("#page-content");
@@ -32,7 +34,8 @@ var taskFormHandler = function (event) {
   else {
     var taskDataObj = {
       name: taskNameInput,
-      type: taskTypeInput
+      type: taskTypeInput,
+      status: "to do"
     };
   //send taskDataObj as argument
     createTaskE1(taskDataObj);
@@ -66,6 +69,12 @@ var createTaskE1 = function (taskDataObj) {
 
   //add entire list item to list
   tasksToDoE1.appendChild(listItemE1);
+
+  //assigning taskIdCounter as a property of the taskDataObj
+  taskDataObj.id = taskIdCounter;
+
+  //pushing the new taskDataObj to the task array
+  tasks.push(taskDataObj);
 
   //increase task counter for next unique id
   taskIdCounter++;
@@ -136,8 +145,22 @@ var taskButtonHandler = function(event) {
 var deleteTask = function(taskId) {
   // find the attribute within the .task-item(class name) element that matches the specific taskId value
   var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+
   //after it's been found, with the remove() method, it's deleted
   taskSelected.remove();
+
+  //create a new array to hold updated list of tasks
+  var updatedTaskArr = [];
+
+  //loop through current tasks
+  for (var i = 0; i < tasks.length; i++) {
+    // if tasks[i].id doesn't match the value of taskId, let's keep that task and push it into the new array
+    if (tasks[i].id !== parseInt(taskId)) {
+      updatedTaskArr.push(tasks[i]);
+    }
+  }
+  // reassign tasks array to be the same as updatedTaskArr
+  tasks = updatedTaskArr
 };
 
 var editTask = function(taskId) {
@@ -165,6 +188,14 @@ var completeEditTask = function(taskName, taskType, taskId) {
   taskSelected.querySelector("h3.task-name").textContent = taskName;
   taskSelected.querySelector("span.task-type").textContent = taskType;
 
+  //loop through tasks array and task object with new content
+  for (var i = 0; i < tasks.length; i++) {
+    if (tasks[i].id === parseInt(taskId)) {
+      tasks[i].name = taskName;
+      tasks[i].type = taskType;
+    }
+  };
+
   alert("Task Updated!");
 
   formE1.removeAttribute("data-task-id");
@@ -191,6 +222,14 @@ var taskStatusChangeHandler = function(event) {
   else if (statusValue === "completed") {
     tasksCompletedE1.appendChild(taskSelected);
   }
+
+  //update task's in tasks array
+  for (var i = 0; i < tasks.length; i++) {
+    if(tasks[i].id === parseInt(taskId)) {
+      tasks[i].status = statusValue;
+    }
+  }
+  console.log(tasks);
 };
 
 //create a new task
